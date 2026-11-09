@@ -33,3 +33,27 @@ Run the Maven wrapper to start up the development mode
 mvn package
 java -jar target/quarkus-app/quarkus-run.jar
 ```
+
+## Add more extensions
+
+- List currently installed extensions and find it using grep (no `-Dinstalled=true` means check entire global catalog of extensions)
+```bash
+mvn quarkus:list-extensions -Dinstalled | grep openapi
+```
+
+- CLI Method
+```bash
+mvn quarkus:add-extension -Dextensions="rest, hibernate-validator"
+```
+
+- Directly edit pom.xml
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-rest-jackson</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-hibernate-validator</artifactId>
+</dependency>
+```
