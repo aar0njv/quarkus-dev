@@ -3,7 +3,7 @@
 - k8s-native java framework designed to optimize Java for containerized env (Docker / K8s)
 
 ## Advantages
- - Live Coding and Dev Services (instant reload in save, automatically spin up unconfigured dependencies via docker daemon during development
+ - Live Coding and Dev Services (instant reload in save, automatically spin up unconfigured dependencies via docker daemon) during development
 
 ## Steps - Initialization
 
@@ -27,4 +27,9 @@ Run the Maven wrapper to start up the development mode
 - quarkus will automatically spin up two containers (`test-container` and `postgres-container`)
 - check `javac -version` before running, it should be same as the version mentioned in `./mvnw -version`
 
-  
+## Build Runnable JAR file
+
+```bash
+mvn package
+java -jar target/quarkus-app/quarkus-run.jar
+```
