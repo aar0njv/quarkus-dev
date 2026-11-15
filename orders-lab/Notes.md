@@ -145,20 +145,24 @@ public class OrderResource {
 Using `jakarta.ws.rs.core.Response` allows complete control over status codes, headers, and entities:
 
 1. **`201 Created` with Location header**:
+
    ```java
    URI location = URI.create("/orders/" + newOrder.id());
    return Response.created(location).entity(newOrder).build();
    ```
 2. **`204 No Content`**:
+
    Signifies the action was successful, but there is no payload body to return:
    ```java
    return Response.noContent().build();
    ```
 3. **`404 Not Found`**:
+
    ```java
    return Response.status(Response.Status.NOT_FOUND).build();
    ```
 4. **`400 Bad Request`**:
+
    ```java
    return Response.status(Response.Status.BAD_REQUEST)
                   .entity(Map.of("error", errorMsg))
