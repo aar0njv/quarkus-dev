@@ -39,6 +39,27 @@ public class OrderService {
         return database.get(id);
     }
 
+    public boolean deleteOrder(String id) {
+        if (database.remove(id) != null) {
+            LOG.infof("Order %s deleted.", id);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean updateOrder(String id, Order updatedOrder) {
+        if (!database.containsKey(id)) {
+            return false;
+        }
+        if (updatedOrder.quantity() > maxItems) {
+            throw new IllegalArgumentException("Order exceeds maximum items limit of " + maxItems);
+        }
+        database.put(id, updatedOrder);
+        LOG.infof("Order %s updated.", id);
+        return true;
+    }
+
     public Collection<Order> getAllOrders() {
         return database.values();
     }
