@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PUT;
+import jakarta.validation.Valid;
 
 
 @Path("/orders")
@@ -47,7 +48,7 @@ public class OrderResource {
 
     // Create order (201 Created) or (400 Bad Request)
     @POST 
-    public Response createOrder(Order order) {
+    public Response createOrder(@Valid Order order) {
         // if ID not provided, generate random UUID
         String orderId = (order.id() == null || order.id().isBlank()) ? UUID.randomUUID().toString() : order.id();
         
@@ -70,7 +71,7 @@ public class OrderResource {
     // Update order (200 OK) or (404 Not Found) or (400 Bad Request)
     @PUT
     @Path("/{id}")
-    public Response updateOrder(@PathParam("id") String id, Order order) {
+    public Response updateOrder(@PathParam("id") String id, @Valid Order order) {
         Order orderToUpdate = new Order(id, order.item(), order.quantity());
         try {
             boolean updated = orderService.updateOrder(id, orderToUpdate);
@@ -85,7 +86,7 @@ public class OrderResource {
         }
     }
 
-    // Detele order (204 No Content) or (404 Not Found)
+    // Delete order (204 No Content) or (404 Not Found)
     @DELETE
     @Path("/{id}")
     public Response deleteOrder(@PathParam("id") String id) {

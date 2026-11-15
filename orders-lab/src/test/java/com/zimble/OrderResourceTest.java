@@ -182,4 +182,42 @@ public class OrderResourceTest {
             .statusCode(200)
             .body("$", hasSize(0));
     }
+
+    @Test
+    @Order(11)
+    public void testCreateOrderWithBlankItemFailsValidation() {
+        String invalidOrder = """
+            {
+                "item": "",
+                "quantity": 5
+            }
+            """;
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(invalidOrder)
+            .when().post("/orders")
+            .then()
+            .statusCode(400)
+            .header("validation-exception", "true");
+    }
+
+    @Test
+    @Order(12)
+    public void testCreateOrderWithZeroQuantityFailsValidation() {
+        String invalidOrder = """
+            {
+                "item": "Monitor",
+                "quantity": 0
+            }
+            """;
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(invalidOrder)
+            .when().post("/orders")
+            .then()
+            .statusCode(400)
+            .header("validation-exception", "true");
+    }
 }

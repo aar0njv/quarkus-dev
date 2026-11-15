@@ -165,7 +165,7 @@ Target requirements for completing `orders-lab`:
   - `GET /orders/{id}`: Returns order details, or HTTP `404 Not Found` if missing.
   - `PUT /orders/{id}`: Updates order, returns HTTP `200 OK` or `404 Not Found`.
   - `DELETE /orders/{id}`: Removes order, returns HTTP `204 No Content` or `404 Not Found`.
-- [ ] **Payload Validation**: Integrate `quarkus-hibernate-validator` (`@Valid`, `@NotBlank`, `@Positive`).
+- [x] **Payload Validation**: Integrate `quarkus-hibernate-validator` (`@Valid`, `@NotBlank`, `@Positive`).
 - [ ] **Observability**: Health checks via `/q/health` (`quarkus-smallrye-health`) and Swagger UI via `/q/swagger-ui`.
 - [x] **Automated Tests**: Unit and integration tests using `@QuarkusTest` and RestAssured (`mvn test`).
 - [ ] **Data Persistence with Panache**: Transition from in-memory map to PostgreSQL database using Hibernate ORM with Panache.
