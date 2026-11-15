@@ -27,7 +27,7 @@ public class OrderService {
         LOG.infof("OrderService started. Maximum items allowed per order: %d", maxItems);
     }
 
-    public void saveOrder(Order order) {
+    public void createOrder(Order order) {
         if (order.quantity() > maxItems){
             throw new IllegalArgumentException("Order exceeds maximum items limit of " + maxItems);
         }
@@ -46,6 +46,12 @@ public class OrderService {
         } else {
             return false;
         }
+    }
+
+    public void deleteAllOrders() {
+        int count = database.size();
+        database.clear();
+        LOG.infof("All %d orders deleted.", count);
     }
 
     public boolean updateOrder(String id, Order updatedOrder) {

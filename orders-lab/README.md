@@ -159,11 +159,13 @@ Target requirements for completing `orders-lab`:
 - [x] **Startup event observer**: `@Observes Startup` for startup initialization and logging.
 - [x] **Config profiles**: `orders.max-items` with `%dev` override injected via `@ConfigProperty`.
 - [x] **In-memory data store**: Thread-safe `ConcurrentHashMap` with validation logic.
-- [ ] **REST Endpoints (`OrderResource`)**:
+- [x] **REST Endpoints (`OrderResource`)**:
   - `POST /orders`: Accepts JSON payload, returns HTTP `201 Created`.
   - `GET /orders`: Returns collection of all orders.
   - `GET /orders/{id}`: Returns order details, or HTTP `404 Not Found` if missing.
+  - `PUT /orders/{id}`: Updates order, returns HTTP `200 OK` or `404 Not Found`.
+  - `DELETE /orders/{id}`: Removes order, returns HTTP `204 No Content` or `404 Not Found`.
 - [ ] **Payload Validation**: Integrate `quarkus-hibernate-validator` (`@Valid`, `@NotBlank`, `@Positive`).
 - [ ] **Observability**: Health checks via `/q/health` (`quarkus-smallrye-health`) and Swagger UI via `/q/swagger-ui`.
-- [ ] **Automated Tests**: Unit and integration tests using `@QuarkusTest` and RestAssured (`mvn test`).
+- [x] **Automated Tests**: Unit and integration tests using `@QuarkusTest` and RestAssured (`mvn test`).
 - [ ] **Data Persistence with Panache**: Transition from in-memory map to PostgreSQL database using Hibernate ORM with Panache.
