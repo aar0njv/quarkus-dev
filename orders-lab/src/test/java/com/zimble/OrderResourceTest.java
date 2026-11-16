@@ -220,4 +220,54 @@ public class OrderResourceTest {
             .statusCode(400)
             .header("validation-exception", "true");
     }
+
+    @Test
+    @Order(13)
+    public void testFilterOrdersByItemQueryParam() {
+        // Clear all first to start clean
+        given().when().delete("/orders").then().statusCode(204);
+
+        // Add 2 Keyboards and 1 Mouse
+        given().contentType(ContentType.JSON)
+            .body("""
+                {"id": "qp-1", "item": "Keyboard", "quantity": 1}
+            """)
+            .when().post("/orders").then().statusCode(201);
+
+        given().contentType(ContentType.JSON)
+            .body("""
+                {"id": "qp-2", "item": "keyboard", "quantity": 2}
+            """)
+            .when().post("/orders").then().statusCode(201);
+
+        given().contentType(ContentType.JSON)
+            .body("""
+                {"id": "qp-3", "item": "Mouse", "quantity": 1}
+            """)
+            .when().post("/orders").then().statusCode(201);
+
+        // Query with ?item=Keyboard should return 2 orders
+        given()
+            .queryParam("item", "Keyboard")
+            .when().get("/orders")
+            .then()
+            .statusCode(200)
+            .body("$", hasSize(2));
+
+        // Query with ?item=Mouse should return 1 order
+        given()
+            .queryParam("item", "Mouse")
+            .when().get("/orders")
+            .then()
+            .statusCode(200)
+            .body("$", hasSize(1))
+            .body("[0].id", equalTo("qp-3"));
+
+        // Query without parameter should return all 3
+        given()
+            .when().get("/orders")
+            .then()
+            .statusCode(200)
+            .body("$", hasSize(3));
+    }
 }

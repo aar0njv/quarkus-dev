@@ -69,4 +69,13 @@ public class OrderService {
     public Collection<Order> getAllOrders() {
         return database.values();
     }
+
+    public Collection<Order> getOrdersByItem(String item) {
+        if (item == null || item.isBlank()) {
+            return database.values();
+        }
+        return database.values().stream()
+                .filter(order -> order.item().equalsIgnoreCase(item.trim()))
+                .toList();
+    }
 }

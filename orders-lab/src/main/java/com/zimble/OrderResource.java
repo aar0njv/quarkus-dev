@@ -14,6 +14,8 @@ import java.util.UUID;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PUT;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.QueryParam;
 
 
 @Path("/orders")
@@ -28,10 +30,13 @@ public class OrderResource {
         this.orderService = orderService;
     }
 
-    // return all orders (200 OK)
-    @GET 
-    public Response getAllOrders() {
-        return Response.ok(orderService.getAllOrders()).build();
+    // GET /orders (all) OR GET /orders?item=Keyboard (filtered)
+    @GET
+    public Response getOrders(@QueryParam("item") @DefaultValue("") String item) {
+        if (item == null || item.isBlank()) {
+            return Response.ok(orderService.getAllOrders()).build();
+        }
+        return Response.ok(orderService.getOrdersByItem(item.trim())).build();
     }
 
     // returns specific order (200 OK) or (404 Not Found)
