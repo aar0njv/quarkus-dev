@@ -1,21 +1,24 @@
 package com.zimble;
 
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Consumes;
+
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.POST;
 import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.PUT;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.QueryParam;
+
 
 
 @Path("/orders")
@@ -59,18 +62,10 @@ public class OrderResource {
         
         Order newOrder = new Order(orderId, order.item(), order.quantity());
         
-        try {
-            orderService.createOrder(newOrder);
-            URI location = URI.create("/orders/" + newOrder.id());
-            return Response.created(location).entity(newOrder).build();
-        } catch (IllegalArgumentException e) {
-            String errorMsg = (e.getMessage() != null && !e.getMessage().isBlank()) 
-                              ? e.getMessage() 
-                              : "Invalid order request";
-            
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity(Map.of("error", errorMsg)).build();
-        }
+        
+        orderService.createOrder(newOrder);
+        URI location = URI.create("/orders/" + newOrder.id());
+        return Response.created(location).entity(newOrder).build();
     }
 
     // Update order (200 OK) or (404 Not Found) or (400 Bad Request)
@@ -78,17 +73,11 @@ public class OrderResource {
     @Path("/{id}")
     public Response updateOrder(@PathParam("id") String id, @Valid Order order) {
         Order orderToUpdate = new Order(id, order.item(), order.quantity());
-        try {
-            boolean updated = orderService.updateOrder(id, orderToUpdate);
-            if (!updated) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-            return Response.ok(orderToUpdate).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                           .entity(Map.of("error", e.getMessage()))
-                           .build();
+        boolean updated = orderService.updateOrder(id, orderToUpdate);
+        if (!updated) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+        return Response.ok(orderToUpdate).build();
     }
 
     // Delete order (204 No Content) or (404 Not Found)

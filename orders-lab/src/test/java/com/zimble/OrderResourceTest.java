@@ -89,7 +89,10 @@ public class OrderResourceTest {
             .when().post("/orders")
             .then()
             .statusCode(400)
-            .body("error", notNullValue());
+            .body("title", equalTo("Bad Request"))
+            .body("status", equalTo(400))
+            .body("detail", notNullValue())
+            .body("timestamp", notNullValue());
     }
 
     @Test
