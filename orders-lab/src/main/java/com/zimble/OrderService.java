@@ -75,7 +75,7 @@ public class OrderService {
             return database.values();
         }
         return database.values().stream()
-                .filter(order -> order.item().equalsIgnoreCase(item.trim()))
+                .filter(order -> order.item().toLowerCase().contains(item.trim().toLowerCase()))
                 .toList();
     }
 }
