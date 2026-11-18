@@ -212,6 +212,75 @@ public String pizzaManualSubscribe() {
 }
 ```
 
+## Core Operators: Transformation & Side Effects
+
+### 1. Synchronous Transformation (`map`)
+
+Used for instant, in-memory transformations. The lambda function takes an item and returns a transformed plain value (not a `Uni`).
+
+```java
+@GET
+@Path("/map")
+public Uni<String> map() {
+    return Uni.createFrom().item("piZza")
+            .map(item -> item.toUpperCase());
+}
+// Full syntax: .onItem().transform(item -> item.toUpperCase());
+```
+
+### 2. Asynchronous Transformation (`chain`)
+
+Used when the next step performs an asynchronous operation that returns a `Uni` (e.g. database query, remote service call). Using `map` here would cause a nested `Uni<Uni<T>>`; `chain` automatically unwraps (flattens) it.
+
+```java
+private Uni<String> findOrderFromDb(String orderId) {
+    return Uni.createFrom().item("Details for [" + orderId + "]")
+            .onItem().delayIt().by(Duration.ofMillis(500));
+}
+
+@GET 
+@Path("/chain")
+public Uni<String> chain() {
+    return Uni.createFrom().item("order-101")
+            .chain(orderId -> findOrderFromDb(orderId));
+}
+// Full syntax: .onItem().transformToUni(orderId -> findOrderFromDb(orderId));
+```
+
+### 3. Synchronous Side Effect (`invoke`)
+
+Performs a synchronous side action (e.g. logging, metrics) without modifying the downstream item. The original item passes through untouched.
+
+```java
+@GET 
+@Path("/invoke")
+public Uni<String> invoke() {
+    return Uni.createFrom().item("PIZZA")
+            .invoke(item -> System.out.println("LOG Recieved for item: " + item)) // side operation
+            .map(item -> item.toLowerCase());   // main operation receives original "PIZZA"
+}
+```
+
+### 4. Asynchronous Side Effect (`call`)
+
+Used when a side effect takes time and returns a `Uni` (e.g. emitting an audit log or event to a remote service). The pipeline pauses until the returned `Uni` completes, discards its result, and passes the original item downstream.
+
+```java
+private Uni<Void> sendAuditLog(String item) {
+    System.out.println(">>> AUDIT LOG: Saving event for " + item + " to external server...");
+    return Uni.createFrom().voidItem()
+            .onItem().delayIt().by(Duration.ofMillis(300));
+}
+
+@GET
+@Path("/call")
+public Uni<String> callExample() {
+    return Uni.createFrom().item("PIZZA")
+            .call(item -> sendAuditLog(item)) // Async side-effect: pauses until audit finishes, but passes "PIZZA" downstream
+            .map(item -> item.toLowerCase());
+}
+```
+
 ## Reactive system principles
 
 The Reactive Manifesto describes four characteristics of reactive
