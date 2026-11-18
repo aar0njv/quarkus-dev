@@ -42,8 +42,7 @@ These are different roles:
 
 ## Quarkus REST execution
 
-Quarkus REST chooses an execution model for endpoint methods.
-
+Quarkus REST chooses an execution model for endpoint methods. When an HTTP request hits, Vert.x accepts tcp connect on an Event Loop thread (named usually vert.x.eventloop-thread-0). How quarkus treats each method depends on the REST endpoint definition
 ### Reactive endpoint returning `Uni`
 
 ``` java
@@ -54,9 +53,10 @@ public Uni<String> reactive() {
 }
 ```
 
-A REST endpoint returning `Uni` is normally treated as a non-blocking
-endpoint and executed on an I/O thread, unless its execution is
-configured otherwise.
+A REST endpoint returning `Uni` a nd doesn't have a `@Blocking` annotation means it is writing a reactive non-blocking code. so it will be ran directly
+on the even-loop thread without switching to a separate worker thread. But event loops are meant to run multiple requests at a time so putting it to sleep using `Thread.sleep()` freezes the thread completely. <br>
+
+As Vert.x has a background watcher `BlockedThreadChecker` checks the event loop and raises a warning in the log if *any event-loop thread has been stuck for more thatn 2000ms*
 
 ### Blocking endpoint using `@Blocking`
 
@@ -71,7 +71,7 @@ public String blocking() throws InterruptedException {
 ```
 
 `@Blocking` tells Quarkus REST to dispatch the endpoint method to a
-worker thread.
+separate worker thread (executor-thread-0)
 
 Important: `@Blocking` does not make the operation asynchronous. It
 moves blocking work off the event-loop thread.
@@ -116,26 +116,6 @@ Thread ... has been blocked for ...
 This indicates that an event-loop thread has been blocked longer than
 the configured threshold.
 
-
-## Moving work to another execution context
-
-Mutiny provides operators that can change where parts of a pipeline
-execute.
-
--   `runSubscriptionOn(...)` controls the execution context used for
-    subscription and upstream work.
--   `emitOn(...)` changes the execution context used for downstream
-    item, failure, and completion events.
-
-These operators are not interchangeable. Learn their behavior before
-using them. Quarkus also provides `@Blocking` for blocking REST endpoint
-methods.
-
-`@RunOnVirtualThread` is another option for suitable blocking endpoint
-code. Virtual threads are different from reactive event-loop execution.
-
-Never call `await()` on an event-loop thread to synchronously wait for a
-`Uni`; doing so blocks the event loop.
 
 ## Reactive system principles
 
