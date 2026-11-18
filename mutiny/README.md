@@ -117,6 +117,101 @@ This indicates that an event-loop thread has been blocked longer than
 the configured threshold.
 
 
+## Blocking using delayIt() inside event-loop thread (*SUGGESTED METHOD*)
+
+```java
+@GET 
+@Path("/delay")
+public Uni<String> delay() {
+    System.out.println("Started on: " + Thread.currentThread().getName());
+    
+    return Uni.createFrom().item("Completed without blocking")
+            .onItem().delayIt().by(Duration.ofSeconds(2));
+}
+```
+
+`.createFrom()` - where does the Uni come from (item). <br>
+`.item()` - supplies data payload (from a lambda supplier or just a string) <br>
+`.onItem()` - only act if item is produced
+
+## Java Virtual Thread
+
+Uses the annotation `@RunOnVirtualThread` and instead of using heavy OS thread (which are limited), quarkus runs methods on virtual threads managed by JVM. Uses zero memory and if we use blocking works like `Thread.sleep()` or db queries, it automatically unmounts from CPU until wait is over.
+
+```java
+ import io.smallrye.common.annotation.RunOnVirtualThread
+ ```
+
+ ```java
+// Java 21 Virtual Thread
+@GET
+@Path("/virtual")
+@RunOnVirtualThread
+public String virtualThread() throws InterruptedException {
+    System.out.println("Thread name: " + Thread.currentThread().getName());
+    System.out.println("Virtual Thread? " + Thread.currentThread().isVirtual());
+    Thread.sleep(2000); // Blocking is fine on a virtual thread!
+    return "Hello from Virtual Thread!";
+}
+```
+
+## Unis are Lazy & Subscription
+
+A `Uni` represents a pipeline or blueprint, not the execution itself. Defining a `Uni` does not start the computation. Nothing happens until someone **subscribes** to it.
+
+If a `Uni` is created but nobody subscribes to it, the pipeline is completely ignored and will never execute.
+
+### 1. Unsubscribed Uni (Does nothing)
+
+```java
+@GET 
+@Path("/pizza")
+public String pizza() {
+    System.out.println("Method entered");
+    
+    // Ignored! No subscriber, so .invoke() never runs
+    Uni.createFrom().item("PIZZA")
+        .invoke(item -> System.out.println(">>> BAKING: " + item));
+    
+    System.out.println("Method exiting.");
+    return "Finished";
+}
+```
+
+### 2. Returning Uni to Quarkus (Quarkus subscribes for you)
+
+In REST endpoints, returning the `Uni` hands the pipeline to Quarkus. Quarkus subscribes to it under the hood to get the result and write the HTTP response.
+
+```java
+@GET 
+@Path("/pizza-quarkus-subscribes")
+public Uni<String> pizzaQuarkusSubscribes() {
+    // Quarkus subscribes automatically because we return the Uni
+    return Uni.createFrom().item("PIZZA")
+        .invoke(item -> System.out.println(">>> BAKING: " + item));
+}
+```
+
+### 3. Manual Subscription (`.subscribe().with(...)`)
+
+When outside a reactive return type, a `Uni` can be triggered manually using `.subscribe().with(...)`:
+
+```java
+@GET
+@Path("/pizza-manual-subscribe")
+public String pizzaManualSubscribe() {
+    Uni<String> pizzaUni = Uni.createFrom().item("PIZZA")
+        .invoke(item -> System.out.println(">>> BAKING: " + item));
+
+    // Manually triggering execution:
+    pizzaUni.subscribe().with(item -> {
+        System.out.println(">>> EATING: " + item);
+    });
+
+    return "Finished";
+}
+```
+
 ## Reactive system principles
 
 The Reactive Manifesto describes four characteristics of reactive
